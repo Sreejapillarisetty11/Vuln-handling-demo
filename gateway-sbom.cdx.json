@@ -1,0 +1,137 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.7",
+  "serialNumber": "urn:uuid:fc9031c8-b2b0-4097-bbd6-a273b7c19aec",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-10-16T11:18:25+00:00",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "manufacturer": {
+            "name": "Aqua Security Software Ltd."
+          },
+          "group": "aquasecurity",
+          "name": "trivy",
+          "version": "0.76.0"
+        }
+      ]
+    },
+    "component": {
+      "bom-ref": "22052e00-4f1f-4680-9ebe-883d76474cc6",
+      "type": "application",
+      "name": "gateway",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SchemaVersion",
+          "value": "2"
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "bom-ref": "a0b1c606-086f-4647-9835-a6eef979430f",
+      "type": "application",
+      "name": "requirements.txt",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:Class",
+          "value": "lang-pkgs"
+        },
+        {
+          "name": "aquasecurity:trivy:Type",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:pypi/jinja2@2.11.2",
+      "type": "library",
+      "name": "Jinja2",
+      "version": "2.11.2",
+      "purl": "pkg:pypi/jinja2@2.11.2",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:pypi/pyyaml@5.3.1",
+      "type": "library",
+      "name": "PyYAML",
+      "version": "5.3.1",
+      "purl": "pkg:pypi/pyyaml@5.3.1",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:pypi/requests@2.25.0",
+      "type": "library",
+      "name": "requests",
+      "version": "2.25.0",
+      "purl": "pkg:pypi/requests@2.25.0",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:pypi/urllib3@1.26.4",
+      "type": "library",
+      "name": "urllib3",
+      "version": "1.26.4",
+      "purl": "pkg:pypi/urllib3@1.26.4",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:PkgType",
+          "value": "pip"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "22052e00-4f1f-4680-9ebe-883d76474cc6",
+      "dependsOn": [
+        "a0b1c606-086f-4647-9835-a6eef979430f"
+      ]
+    },
+    {
+      "ref": "a0b1c606-086f-4647-9835-a6eef979430f",
+      "dependsOn": [
+        "pkg:pypi/jinja2@2.11.2",
+        "pkg:pypi/pyyaml@5.3.1",
+        "pkg:pypi/requests@2.25.0",
+        "pkg:pypi/urllib3@1.26.4"
+      ]
+    },
+    {
+      "ref": "pkg:pypi/jinja2@2.11.2",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:pypi/pyyaml@5.3.1",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:pypi/requests@2.25.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:pypi/urllib3@1.26.4",
+      "dependsOn": []
+    }
+  ],
+  "vulnerabilities": []
+}

@@ -58,3 +58,4 @@ trivy fs --format cyclonedx --output gateway-sbom.cdx.json gateway
 trivy sbom gateway-sbom.cdx.json
 trivy sbom --vex gateway-vex.json gateway-sbom.cdx.json
 ```
+| `CRA & IEC 62443 Gap Analysis – Networked Refrigeration Controller.pdf` | Self-study gap analysis of a fictional networked controller against the CRA and IEC 62443 |

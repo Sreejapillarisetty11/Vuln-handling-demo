@@ -1,1 +1,79 @@
+# Automated vulnerability handling for the RC-100 gateway (demo).
+# Runs the same steps as the manual process in README.md:
+#   1. generate a CycloneDX SBOM   2. scan it for known CVEs
+#   3. apply the VEX triage        4. block the build if a HIGH/CRITICAL finding is still open
+# CRA link: Annex I Part II requires an up-to-date SBOM and handling
+# vulnerabilities "without delay" - this makes both continuous.
 
+name: Security scan (SBOM, CVE, VEX)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # New CVEs are published even when our code does not change,
+  # so the product is re-checked every Monday morning.
+  schedule:
+    - cron: "17 5 * * 1"
+  workflow_dispatch: # manual "Run workflow" button
+
+# Least privilege: the pipeline can only read the repository.
+permissions:
+  contents: read
+
+jobs:
+  sbom-and-scan:
+    runs-on: ubuntu-24.04
+    steps:
+      # Actions are pinned to a full commit hash, not a tag,
+      # so a moved or hijacked tag cannot change what runs here.
+      - name: Check out code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567 # v0.3.1
+        with:
+          version: v0.76.0
+          cache: true
+
+      - name: 1. Generate SBOM (CycloneDX)
+        run: trivy fs --format cyclonedx --output sbom.cdx.json gateway
+
+      - name: 2+3. Scan SBOM and apply VEX triage
+        run: |
+          trivy sbom --vex gateway-vex.json --format json  --output scan-report.json sbom.cdx.json
+          trivy sbom --vex gateway-vex.json --format table --output scan-report.txt  sbom.cdx.json
+
+      - name: Write results to the run summary
+        if: always()
+        run: |
+          count() { jq "[.Results[]?.Vulnerabilities[]? | select(.Severity==\"$1\")] | length" scan-report.json; }
+          {
+            echo "## Vulnerability scan: RC-100 gateway"
+            echo "Open findings after VEX triage (findings marked *not affected* are filtered out):"
+            echo ""
+            echo "| Critical | High | Medium | Low |"
+            echo "|---|---|---|---|"
+            echo "| $(count CRITICAL) | $(count HIGH) | $(count MEDIUM) | $(count LOW) |"
+            echo ""
+            echo "Gate rule: the build fails if any CRITICAL or HIGH finding is open."
+            echo ""
+            echo '```'
+            cat scan-report.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 4. Security gate (fail on open HIGH/CRITICAL)
+        run: trivy sbom --vex gateway-vex.json --severity HIGH,CRITICAL --exit-code 1 sbom.cdx.json
+
+      # Kept even when the gate fails, as evidence for triage and audits.
+      - name: Save SBOM and reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sbom-and-scan-report
+          path: |
+            sbom.cdx.json
+            scan-report.json
+            scan-report.txt
+          retention-days: 90

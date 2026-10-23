@@ -1,5 +1,7 @@
 # Vulnerability Handling Demo: SBOM, Triage, VEX, Fix, Advisory
 
+[![Security scan](https://github.com/Sreejapillarisetty11/vuln-handling-demo/actions/workflows/security-scan.yml/badge.svg)](https://github.com/Sreejapillarisetty11/vuln-handling-demo/actions/workflows/security-scan.yml)
+
 A hands-on self-study exercise covering the full vulnerability handling cycle
 required for manufacturers by the EU Cyber Resilience Act (CRA, Annex I Part II).
 
@@ -37,6 +39,35 @@ one was. Severity (CVSS) alone does not decide; reachability and deployment cont
 | `gateway-vex.json` | OpenVEX statements for the 3 *not affected* findings |
 | `gateway-sbom-fixed.cdx.json` | CycloneDX SBOM of v1.1 (fixed versions) |
 | `ADVISORY.md` | Security advisory for the affected finding |
+| `.github/workflows/security-scan.yml` | CI pipeline that repeats the SBOM → scan → VEX steps automatically |
+| `CRA & IEC 62443 Gap Analysis – Networked Refrigeration Controller.pdf` | Self-study gap analysis of a fictional networked controller against the CRA and IEC 62443 |
+
+## Automated pipeline (CI)
+
+The manual steps above also run automatically in GitHub Actions
+(`.github/workflows/security-scan.yml`), on every push, on every pull request
+and every Monday morning. The weekly run matters because new CVEs are published
+even when the code does not change.
+
+| Step | What it does |
+|---|---|
+| 1. SBOM | Trivy generates a fresh CycloneDX SBOM of `gateway/` |
+| 2. Scan | The SBOM is checked against the Trivy vulnerability database |
+| 3. VEX | Findings documented as *not affected* in `gateway-vex.json` are filtered out |
+| 4. Gate | The build fails if a HIGH or CRITICAL finding is still open |
+| Evidence | SBOM and scan reports are stored with each run for 90 days |
+
+Design choices:
+- **Gate on HIGH/CRITICAL only.** Medium and low findings are shown in the run
+  summary and triaged by a person, so the build does not stop for every minor CVE.
+- **VEX inside the pipeline.** A *not affected* decision is made once, documented,
+  and applied automatically, instead of the same false alarm being discussed every week.
+- **Pipeline hardening.** Read-only permissions, and every action pinned to a
+  commit hash, so the pipeline itself is not a supply-chain weak point.
+
+Link to the CRA: Annex I Part II asks for an SBOM and for vulnerabilities to be
+handled without delay. The pipeline keeps both up to date automatically
+instead of relying on a manual check before each release.
 
 ## Further lessons
 - **Zero findings does not mean secure.** A first scan of an image based on an
@@ -58,5 +89,3 @@ trivy fs --format cyclonedx --output gateway-sbom.cdx.json gateway
 trivy sbom gateway-sbom.cdx.json
 trivy sbom --vex gateway-vex.json gateway-sbom.cdx.json
 ```
-| `CRA & IEC 62443 Gap Analysis – Networked Refrigeration Controller.pdf` | 
-Self-study gap analysis of a fictional networked controller against the CRA and IEC 62443 |
